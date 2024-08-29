@@ -1,11 +1,13 @@
 import { createApp } from "vue";
-
-import App from "./App.vue";
-
-// import 'bootstrap/dist/css/bootstrap.css'
-// import 'bootstrap-vue/dist/bootstrap-vue.css'
+import App from "./components/App.vue";
+import moment from 'moment';
 
 const app = createApp(App);
 
-// app.use(BootstrapVue);
+app.provide('moment', moment);
+
+app.config.globalProperties.$formatDate = function (value) {
+    return moment(value).format('YYYY-MM-DD HH:mm');
+};
+
 app.mount("#order_app");
