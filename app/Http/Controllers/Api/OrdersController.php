@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\OrderListRequest;
-use App\Http\Requests\OrderRequest;
-use App\Models\Order;
+use App\Http\Requests\Orders\BulkDeleteRequest;
+use App\Http\Requests\Orders\OrderListRequest;
+use App\Http\Requests\Orders\NewOrderRequest;
 use App\Repositories\OrderRepositoryInterface;
 use Illuminate\Http\JsonResponse;
 
@@ -21,7 +21,7 @@ class OrdersController extends Controller
         return response()->json($orders->toArray());
     }
 
-    public function store(OrderRequest $request)
+    public function store(NewOrderRequest $request)
     {
         return $this->orderRepository->store($request);
     }
@@ -33,13 +33,13 @@ class OrdersController extends Controller
         return $order ? response()->json($order->toArray()) : response()->json(status: 404);
     }
 
-    public function update(OrderRequest $request, string $id)
+    public function update(NewOrderRequest $request, string $id)
     {
         $order = $this->orderRepository->find($id);
 
         if (!$order) {
             return response()->json([
-                'error' => "Order $id not found"
+                'error' => "Order $id not found."
             ], 404);
         }
 
@@ -50,8 +50,17 @@ class OrdersController extends Controller
 
     public function delete(string $id): JsonResponse
     {
-        $this->orderRepository->delete($id);
+        $this->orderRepository->delete([$id]);
 
         return response()->json();
+    }
+
+    public function deleteBulk(BulkDeleteRequest $request): JsonResponse
+    {
+        $count = $this->orderRepository->delete($request->input('ids'));
+
+        return response()->json([
+            'message' => "$count order(s) deleted successfully."
+        ]);
     }
 }

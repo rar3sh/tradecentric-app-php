@@ -2,8 +2,8 @@
 
 namespace App\Repositories;
 
-use App\Http\Requests\OrderListRequest;
-use App\Http\Requests\OrderRequest;
+use App\Http\Requests\Orders\OrderListRequest;
+use App\Http\Requests\Orders\NewOrderRequest;
 use App\Models\Order;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Str;
@@ -39,7 +39,7 @@ class DatabaseOrderRepository implements OrderRepositoryInterface
         return Order::query()->find($orderId);
     }
 
-    public function store(OrderRequest $request): Order
+    public function store(NewOrderRequest $request): Order
     {
         return Order::query()->create([
             'buyer_name' => $request->get('buyer_name'),
@@ -47,8 +47,8 @@ class DatabaseOrderRepository implements OrderRepositoryInterface
         ]);
     }
 
-    public function delete(string $orderId): int
+    public function delete(array $orderIds): int
     {
-        return Order::query()->where('id', $orderId)->delete();
+        return Order::query()->whereIn('id', $orderIds)->delete();
     }
 }

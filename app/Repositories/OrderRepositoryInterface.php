@@ -2,8 +2,8 @@
 
 namespace App\Repositories;
 
-use App\Http\Requests\OrderListRequest;
-use App\Http\Requests\OrderRequest;
+use App\Http\Requests\Orders\OrderListRequest;
+use App\Http\Requests\Orders\NewOrderRequest;
 use App\Models\Order;
 use Illuminate\Pagination\LengthAwarePaginator;
 
@@ -13,7 +13,7 @@ interface OrderRepositoryInterface
 
     public function find(string $orderId): ?Order;
 
-    public function store(OrderRequest $request): Order;
+    public function store(NewOrderRequest $request): Order;
 
-    public function delete(string $orderId): int;
+    public function delete(array $orderIds): int;
 }

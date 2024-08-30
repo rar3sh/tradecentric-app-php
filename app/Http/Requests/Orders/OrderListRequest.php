@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Orders;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\AppRequest;
 
-class OrderListRequest extends FormRequest
+class OrderListRequest extends AppRequest
 {
-    public function rules()
+    public function rules(): array
     {
         return [
             'perPage' => 'integer|min:1',
@@ -16,10 +16,5 @@ class OrderListRequest extends FormRequest
             'total_minimum' => 'sometimes|integer|nullable',
             'created_after' => 'date|nullable',
         ];
-    }
-
-    public function authorize()
-    {
-        return true;
     }
 }
