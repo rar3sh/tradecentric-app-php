@@ -23,6 +23,6 @@ Route::namespace('App\Http\Controllers\Api')->prefix('orders')->group(function (
     Route::get('/{id}')->uses('OrdersController@show')->name('orders.show');
     Route::post('/')->uses('OrdersController@store')->name('orders.store');
     Route::put('/{id}')->uses('OrdersController@update')->name('orders.edit');
-    Route::delete('/bulk')->uses('OrdersController@deleteBulk')->name('orders.delete');
+    Route::post('/delete-bulk')->uses('OrdersController@deleteBulk')->name('orders.delete');
     Route::delete('/{id}')->uses('OrdersController@delete')->name('orders.delete');
 });
