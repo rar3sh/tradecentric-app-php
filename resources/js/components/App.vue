@@ -40,10 +40,21 @@
         </div>
     </div>
 
-    <div class="container" id="orders-table" v-show="!this.loading">
+    <div class="container" id="orders-table">
+        <div class="container bulk-actions-container">
+            <div class="col-md-12" v-show="this.selectedOrders.length > 0">
+                <button class="btn btn-primary m-2"
+                        @click.prevent="resetSelection">Reset Selection
+                </button>
+                <button class="btn btn-danger m-2"
+                        @click.prevent="bulkDeleteOrders">Delete Selected Orders
+                </button>
+            </div>
+        </div>
         <table class="table">
             <thead class="table-light">
             <tr>
+                <th></th>
                 <th>#</th>
                 <th>Order Number</th>
                 <th>Buyer Name</th>
@@ -55,7 +66,15 @@
             </thead>
 
             <tbody v-show="this.hasOrders">
-            <tr v-for="(order, index) in this.orders" :key="order.id">
+            <tr v-for="(order, index) in this.orders" :key="order.id" class="order-row">
+                <td>
+                    <input type="checkbox"
+                           class="form-check-input mt-0"
+                           :id="'order_' + order.id"
+                           :checked="selectedOrders.includes(order.id)"
+                           @click="selectOrder($event, order)"
+                    >
+                </td>
                 <td>{{ index + 1 }}</td>
                 <td>{{ order.order_number }}</td>
                 <td>{{ order.buyer_name }}</td>
@@ -63,12 +82,12 @@
                 <td>{{ $formatDate(order.created_at) }}</td>
                 <td>{{ $formatDate(order.updated_at) }}</td>
                 <td>
-                    <button class="btn btn-success" @click.prevent="viewEdit">View</button>
+                    <button class="btn btn-success" @click.prevent="showOrder">Edit</button>
                 </td>
             </tr>
             </tbody>
             <div class="row" v-show="!this.hasOrders">
-                    <h1 class="text-center">No data to display.</h1>
+                <h1 class="text-center">No data to display.</h1>
             </div>
         </table>
     </div>
@@ -91,38 +110,72 @@ export default {
                 'buyer_name': '',
                 'total_minimum': ''
             },
+            ordersCount: 0,
+            selectedOrders: []
         }
     },
     methods: {
         onFiltersChanged () {
-            this.refreshData()
+            this.refreshOrdersList()
         },
 
         onPaginationChanged (page, pageSize) {
             this.page = page
             this.pageSize = pageSize
-            this.refreshData()
+            this.refreshOrdersList()
         },
 
-        viewEdit (orderId) {
-            // this.page = page
-            // this.pageSize = pageSize
-            // this.refreshData()
+        showOrder (orderId) {
+
         },
 
-        async refreshData () {
+        async refreshOrdersList () {
             this.loading = true
             try {
                 let response = await axios.get('/api/orders?' + this.queryFilters)
                 this.loading = false
-                this.orders = response.data.data
-                console.log('new data', this.orders)
-                console.log('loading', this.loading)
+                this.parseOrdersResponse(response.data)
+
             } catch (error) {
                 console.log(error)
                 this.loading = false
                 this.orders = []
             }
+        },
+
+        bulkDeleteOrders() {
+
+        },
+
+        parseOrdersResponse (apiResponse) {
+            this.orders = apiResponse.data
+            this.ordersCount = apiResponse.total
+            this.page = apiResponse.current_page
+            this.pageSize = apiResponse.per_page
+            console.log('new data', this.orders)
+            console.log('this.ordersCount', this.ordersCount)
+        },
+
+        selectOrder (event, order) {
+            if (event.target.checked) {
+                if (this.selectedOrders.indexOf(order.id) === -1) { //missing from selection
+                    this.selectedOrders.push(order.id)
+                    console.log('checked', order.id)
+                }
+                console.log('selectedOrders', this.selectedOrders)
+                return
+            }
+
+            if (this.selectedOrders.indexOf(order.id) > -1) {   //exists in selection
+                this.selectedOrders.splice(this.selectedOrders.indexOf(order.id), 1)
+                console.log('Unchecked', order.id)
+            }
+            console.log('selectedOrders', this.selectedOrders)
+        },
+
+        resetSelection () {
+            this.selectedOrders = []
+            console.log('selectedOrders', this.selectedOrders)
         }
     },
     computed: {
@@ -142,7 +195,7 @@ export default {
         }
     },
     mounted () {
-        this.refreshData()
+        this.refreshOrdersList()
     }
 }
 </script>
@@ -162,11 +215,20 @@ export default {
     margin-right: 10px;
 }
 
+.bulk-actions-container {
+    margin: 20px 0px;
+    height: 50px;
+}
+
 .search-btn {
     margin-top: 25px;
 }
 
 #orders-table {
     margin-top: 20px;
+}
+
+#orders-table .order-row {
+    vertical-align: middle;
 }
 </style>
