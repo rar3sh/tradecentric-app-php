@@ -97,7 +97,9 @@
                 </div>
             </table>
 
-            <Pagination :pagination="this.pagination" @paginationChanged="onPaginationChanged"/>
+            <Pagination :pagination="this.pagination"
+                        @paginationChanged="refreshOrdersList"
+            />
         </div>
     </div>
 </template>
@@ -134,11 +136,6 @@ export default {
 
         onFiltersChanged () {
             this.refreshOrdersList()
-        },
-
-        onPaginationChanged (page, perPage = null) {
-            console.log("onPaginationChanged page | perPAge", page, perPage)
-            perPage !== null ? this.refreshOrdersList(page, perPage) : this.refreshOrdersList(page)
         },
 
         showOrder (orderId) {
