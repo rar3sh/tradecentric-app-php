@@ -96,6 +96,8 @@
                     <h1 class="text-center">No data to display.</h1>
                 </div>
             </table>
+
+            <Pagination :pagination="this.pagination" @paginationChanged="onPaginationChanged"/>
         </div>
     </div>
 </template>
@@ -104,16 +106,18 @@
 <script>
 import axios from 'axios'
 import ConfirmAction from './Modals/ConfirmAction.vue'
+import Pagination from './Modals/Pagination.vue'
+import { PaginationModel } from '../Models/PaginationModel.ts'
 
 export default {
     name: 'App',
-    components: { ConfirmAction },
+    components: { Pagination, ConfirmAction },
     data () {
         return {
             loading: false,
             orders: [],
-            page: 1,
-            pageSize: 20,
+            pagination: new PaginationModel(),
+            lastPage: 0,
             filters: {
                 'order_number': '',
                 'buyer_name': '',
@@ -132,22 +136,22 @@ export default {
             this.refreshOrdersList()
         },
 
-        onPaginationChanged (page, pageSize) {
-            this.page = page
-            this.pageSize = pageSize
-            this.refreshOrdersList()
+        onPaginationChanged (page, perPage = null) {
+            console.log("onPaginationChanged page | perPAge", page, perPage)
+            perPage !== null ? this.refreshOrdersList(page, perPage) : this.refreshOrdersList(page)
         },
 
         showOrder (orderId) {
 
         },
 
-        async refreshOrdersList () {
+        async refreshOrdersList (page = 1, perPage = 10) {
             this.resetSelection();
             this.toggleLoading()
             try {
-                let response = await axios.get('/api/orders?' + this.queryFilters)
-                this.parseOrdersResponse(response.data)
+                let queryString = this.queryFilters + `perPage=${perPage}&` + `page=${page}`
+                let response = await axios.get(`/api/orders?${queryString}`)
+                this.parseOrderSearchResponse(response.data)
             } catch (error) {
                 console.log(error)
                 this.orders = []
@@ -170,11 +174,21 @@ export default {
             await this.refreshOrdersList()
         },
 
-        parseOrdersResponse (apiResponse) {
+        parseOrderSearchResponse (apiResponse) {
             this.orders = apiResponse.data
             this.ordersCount = apiResponse.total
-            this.page = apiResponse.current_page
-            this.pageSize = apiResponse.per_page
+
+            let pagination = new PaginationModel();
+            pagination.currentPage = apiResponse.current_page
+            pagination.perPage = apiResponse.per_page
+            pagination.lastPage = apiResponse.last_page
+            pagination.from = apiResponse.from
+            pagination.to = apiResponse.to
+            pagination.total = apiResponse.total
+            this.pagination = pagination
+            // this.page = apiResponse.current_page
+            // this.perPage = apiResponse.per_page
+            // this.lastPage = apiResponse.last_page
             console.log('new data', this.orders)
             console.log('this.ordersCount', this.ordersCount)
         },
@@ -209,7 +223,7 @@ export default {
                     query += `${key}=${value}&`
                 }
             }
-            query += `perPage=${this.pageSize}&` + `page=${this.page}`
+
             return query
         },
 
