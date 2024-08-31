@@ -16,7 +16,8 @@ class OrdersController extends Controller
     {
     }
 
-    public function index(OrderListRequest $orderListRequest): JsonResponse {
+    public function index(OrderListRequest $orderListRequest): JsonResponse
+    {
         $orders = $this->orderRepository->getFilteredOrdersPaginated($orderListRequest);
 
         return response()->json($orders->toArray());
@@ -69,12 +70,18 @@ class OrdersController extends Controller
 
     public function ordersPerDay(): JsonResponse
     {
-        $ordersPerDay = Order::query()
+        $data = Order::query()
             ->selectRaw('count(*) as count, date(created_at) as date')
             ->withoutTrashed()
             ->groupByRaw('date')
             ->get();
 
-        return response()->json($ordersPerDay->toArray());
+        return response()->json([
+                'count' => $data->pluck('count'),
+                'days' => $data->pluck('date')
+//            'days' => $data->pluck('count', 'date')
+            ]
+
+        );
     }
 }
