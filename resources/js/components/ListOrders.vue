@@ -17,8 +17,6 @@
                        content="Are you sure you want to delete the selected items? It cannot be undone."
                        @confirm="bulkDeleteOrders"/>
 
-        <OrderEditModal id="order_edit_modal" :order-id="currentOrderId"/>
-
         <!-- FILTER   -->
         <div class="container">
             <div class="container-fluid">
