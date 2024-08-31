@@ -3,7 +3,7 @@
 namespace App\Repositories;
 
 use App\Http\Requests\Orders\OrderListRequest;
-use App\Http\Requests\Orders\NewOrderRequest;
+use App\Http\Requests\Orders\AddEditOrderRequest;
 use App\Models\Order;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Str;
@@ -39,12 +39,13 @@ class DatabaseOrderRepository implements OrderRepositoryInterface
         return Order::query()->find($orderId);
     }
 
-    public function store(NewOrderRequest $request): Order
+    public function store(array $attributes): Order
     {
-        return Order::query()->create([
-            'buyer_name' => $request->get('buyer_name'),
-            'order_number' => 'TC000' . mb_strtoupper(Str::random()),
-        ]);
+        $order = new Order($attributes);
+        $order->order_number = 'TC000' . mb_strtoupper(Str::random());
+        $order->save();
+
+        return $order->refresh();
     }
 
     public function delete(array $orderIds): int

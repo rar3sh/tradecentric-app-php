@@ -5,9 +5,11 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Orders\BulkDeleteRequest;
 use App\Http\Requests\Orders\OrderListRequest;
-use App\Http\Requests\Orders\NewOrderRequest;
+use App\Http\Requests\Orders\AddEditOrderRequest;
+use App\Models\Order;
 use App\Repositories\OrderRepositoryInterface;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Str;
 
 class OrdersController extends Controller
 {
@@ -21,9 +23,9 @@ class OrdersController extends Controller
         return response()->json($orders->toArray());
     }
 
-    public function store(NewOrderRequest $request)
+    public function store(AddEditOrderRequest $request)
     {
-        return $this->orderRepository->store($request);
+        return $this->orderRepository->store($request->validated());
     }
 
     public function show(string $id): JsonResponse
@@ -33,7 +35,7 @@ class OrdersController extends Controller
         return $order ? response()->json($order->toArray()) : response()->json(status: 404);
     }
 
-    public function update(NewOrderRequest $request, string $id)
+    public function update(AddEditOrderRequest $request, string $id)
     {
         $order = $this->orderRepository->find($id);
 
@@ -43,7 +45,9 @@ class OrdersController extends Controller
             ], 404);
         }
 
-        $order->update($request->validated());
+        $order->buyer_name = $request->input('buyer_name');
+        $order->total = $request->input('total');
+        $order->update();
 
         return response()->json($order->toArray());
     }

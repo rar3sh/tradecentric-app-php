@@ -1,14 +1,23 @@
 <template>
     <div id="main_page_container">
         <div class="container">
-            <h2 class="title-top">Purchase Orders</h2>
+            <div class="row">
+                <div class="col-md-6">
+                    <h2 class="title-top">Purchase Orders</h2>
+                </div>
+
+                <div class="col-md-6">
+                    <RouterLink to="/orders/add" class="btn btn-primary m-2">Create New Order</RouterLink>
+                </div>
+            </div>
         </div>
 
         <ConfirmAction id="bulk_delete_confirm_modal"
                        title="Confirmation"
-                       content="Are you sure you want to delete the selected items. It cannot be undone."
-                       @confirm="bulkDeleteOrders"
-        />
+                       content="Are you sure you want to delete the selected items? It cannot be undone."
+                       @confirm="bulkDeleteOrders"/>
+
+        <OrderEditModal id="order_edit_modal" :order-id="currentOrderId"/>
 
         <!-- FILTER   -->
         <div class="container">
@@ -42,21 +51,20 @@
             </div>
         </div>
 
-        <div class="text-center" v-show="this.loading">
-            <div class="spinner-border" role="status">
-                <span class="visually-hidden">Loading...</span>
-            </div>
-        </div>
 
+
+        <!-- TABLE CONTAINER  -->
         <div class="container" id="orders-table">
             <div class="container bulk-actions-container">
                 <div class="col-md-12" v-show="this.selectedOrders.length > 0">
                     <button class="btn btn-primary m-2" @click.prevent="resetSelection">Reset Selection</button>
                     <button class="btn btn-danger m-2"
                             data-bs-toggle="modal" data-bs-target="#bulk_delete_confirm_modal"
-                    >Delete Selected Orders</button>
+                    >Delete Selected Orders
+                    </button>
                 </div>
             </div>
+
             <table class="table">
                 <thead class="table-light">
                 <tr>
@@ -71,7 +79,13 @@
                 </tr>
                 </thead>
 
-                <tbody v-show="this.hasOrders">
+                <div class="text-center" v-show="this.loading">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+
+                <tbody v-show="!this.loading && this.hasOrders">
                 <tr v-for="(order, index) in this.orders" :key="order.id" class="order-row">
                     <td>
                         <input type="checkbox"
@@ -87,12 +101,10 @@
                     <td>{{ order.total }}</td>
                     <td>{{ $formatDate(order.created_at) }}</td>
                     <td>{{ $formatDate(order.updated_at) }}</td>
-                    <td>
-                        <button class="btn btn-success" @click.prevent="showOrder">Edit</button>
-                    </td>
+                    <td><RouterLink :to="'/orders/' + order.id">EDIT</RouterLink></td>
                 </tr>
                 </tbody>
-                <div class="row" v-show="!this.hasOrders">
+                <div class="row" v-show="!this.loading && !this.hasOrders">
                     <h1 class="text-center">No data to display.</h1>
                 </div>
             </table>
@@ -112,8 +124,8 @@ import Pagination from './Modals/Pagination.vue'
 import { PaginationModel } from '../Models/PaginationModel.ts'
 
 export default {
-    name: 'App',
-    components: { Pagination, ConfirmAction },
+    name: 'ListOrders',
+    components: {Pagination, ConfirmAction },
     data () {
         return {
             loading: false,
@@ -126,7 +138,8 @@ export default {
                 'total_minimum': ''
             },
             ordersCount: 0,
-            selectedOrders: []
+            selectedOrders: [],
+            currentOrderId: null
         }
     },
     methods: {
@@ -138,12 +151,8 @@ export default {
             this.refreshOrdersList()
         },
 
-        showOrder (orderId) {
-
-        },
-
         async refreshOrdersList (page = 1, perPage = 10) {
-            this.resetSelection();
+            this.resetSelection()
             this.toggleLoading()
             try {
                 let queryString = this.queryFilters + `perPage=${perPage}&` + `page=${page}`
@@ -161,7 +170,7 @@ export default {
             this.toggleLoading()
             try {
                 await axios.post('/api/orders/delete-bulk', {
-                    "ids": this.selectedOrders
+                    'ids': this.selectedOrders
                 })
             } catch (error) {
                 console.log(error)
@@ -175,7 +184,7 @@ export default {
             this.orders = apiResponse.data
             this.ordersCount = apiResponse.total
 
-            let pagination = new PaginationModel();
+            let pagination = new PaginationModel()
             pagination.currentPage = apiResponse.current_page
             pagination.perPage = apiResponse.per_page
             pagination.lastPage = apiResponse.last_page
@@ -183,33 +192,23 @@ export default {
             pagination.to = apiResponse.to
             pagination.total = apiResponse.total
             this.pagination = pagination
-            // this.page = apiResponse.current_page
-            // this.perPage = apiResponse.per_page
-            // this.lastPage = apiResponse.last_page
-            console.log('new data', this.orders)
-            console.log('this.ordersCount', this.ordersCount)
         },
 
         selectOrder (event, order) {
             if (event.target.checked) {
                 if (this.selectedOrders.indexOf(order.id) === -1) { //missing from selection
                     this.selectedOrders.push(order.id)
-                    console.log('checked', order.id)
                 }
-                console.log('selectedOrders', this.selectedOrders)
                 return
             }
 
             if (this.selectedOrders.indexOf(order.id) > -1) {   //exists in selection
                 this.selectedOrders.splice(this.selectedOrders.indexOf(order.id), 1)
-                console.log('Unchecked', order.id)
             }
-            console.log('selectedOrders', this.selectedOrders)
         },
 
         resetSelection () {
             this.selectedOrders = []
-            console.log('selectedOrders', this.selectedOrders)
         }
     },
     computed: {
