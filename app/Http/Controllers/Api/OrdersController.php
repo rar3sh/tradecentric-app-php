@@ -9,7 +9,6 @@ use App\Http\Requests\Orders\AddEditOrderRequest;
 use App\Models\Order;
 use App\Repositories\OrderRepositoryInterface;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Str;
 
 class OrdersController extends Controller
 {
@@ -23,7 +22,7 @@ class OrdersController extends Controller
         return response()->json($orders->toArray());
     }
 
-    public function store(AddEditOrderRequest $request)
+    public function store(AddEditOrderRequest $request): Order
     {
         return $this->orderRepository->store($request->validated());
     }
@@ -66,5 +65,16 @@ class OrdersController extends Controller
         return response()->json([
             'message' => "$count order(s) deleted successfully."
         ]);
+    }
+
+    public function ordersPerDay(): JsonResponse
+    {
+        $ordersPerDay = Order::query()
+            ->selectRaw('count(*) as count, date(created_at) as date')
+            ->withoutTrashed()
+            ->groupByRaw('date')
+            ->get();
+
+        return response()->json($ordersPerDay->toArray());
     }
 }

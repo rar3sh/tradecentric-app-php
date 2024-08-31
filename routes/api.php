@@ -25,4 +25,10 @@ Route::namespace('App\Http\Controllers\Api')->prefix('orders')->group(function (
     Route::patch('/{id}')->uses('OrdersController@update')->name('orders.edit');
     Route::post('/delete-bulk')->uses('OrdersController@deleteBulk')->name('orders.delete');
     Route::delete('/{id}')->uses('OrdersController@delete')->name('orders.delete');
+
+    Route::get('/chart-per-day')->uses('OrdersController@index')->name('orders.index');
+});
+
+Route::namespace('App\Http\Controllers\Api')->prefix('charts')->group(function () {
+    Route::get('/orders-per-day')->uses('OrdersController@ordersPerDay')->name('orders.index');
 });
