@@ -2,7 +2,7 @@
 
 namespace App\Repositories;
 
-use App\Http\Requests\Orders\OrderListRequest;
+use App\Http\Requests\Orders\OrderFilterRequest;
 use App\Models\Order;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Str;
@@ -12,7 +12,7 @@ class DatabaseOrderRepository implements OrderRepositoryInterface
     public const MAX_PER_PAGE = 100;
     public const DEFAULT_PAGE_SIZE = 10;
 
-    public function getFilteredOrdersPaginated(OrderListRequest $listRequest): LengthAwarePaginator
+    public function getFilteredOrdersPaginated(OrderFilterRequest $listRequest): LengthAwarePaginator
     {
         $perPage = min(self::MAX_PER_PAGE, $listRequest->get('perPage', self::DEFAULT_PAGE_SIZE));
         $page = max(1, $listRequest->get('page'));

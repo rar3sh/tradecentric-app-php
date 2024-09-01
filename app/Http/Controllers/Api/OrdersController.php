@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Orders\BulkDeleteRequest;
-use App\Http\Requests\Orders\OrderListRequest;
+use App\Http\Requests\Orders\OrderFilterRequest;
 use App\Http\Requests\Orders\AddEditOrderRequest;
 use App\Models\Order;
 use App\Repositories\OrderRepositoryInterface;
@@ -16,16 +16,18 @@ class OrdersController extends Controller
     {
     }
 
-    public function index(OrderListRequest $orderListRequest): JsonResponse
+    public function index(OrderFilterRequest $orderListRequest): JsonResponse
     {
         $orders = $this->orderRepository->getFilteredOrdersPaginated($orderListRequest);
 
         return response()->json($orders->toArray());
     }
 
-    public function store(AddEditOrderRequest $request): Order
+    public function store(AddEditOrderRequest $request): JsonResponse
     {
-        return $this->orderRepository->store($request->validated());
+        return response()->json(
+            $this->orderRepository->store($request->input())->toArray()
+        );
     }
 
     public function show(string $id): JsonResponse

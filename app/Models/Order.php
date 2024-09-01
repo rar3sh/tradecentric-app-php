@@ -22,4 +22,9 @@ class Order extends Model
         'buyer_name',
         'total',
     ];
+
+    protected $casts = [
+      'created_at' => 'datetime',
+      'updated_at' => 'datetime',
+    ];
 }

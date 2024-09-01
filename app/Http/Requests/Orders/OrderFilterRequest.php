@@ -4,7 +4,7 @@ namespace App\Http\Requests\Orders;
 
 use App\Http\Requests\AppRequest;
 
-class OrderListRequest extends AppRequest
+class OrderFilterRequest extends AppRequest
 {
     public function rules(): array
     {

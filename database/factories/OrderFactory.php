@@ -14,8 +14,8 @@ class OrderFactory extends Factory
     public function definition()
     {
         return [
-            'created_at' => Carbon::now()->subDays(random_int(1, 90)),
-            'updated_at' => Carbon::now(),
+            'created_at' => Carbon::now()->subDays(random_int(1, 90))->toDateTimeLocalString(),
+            'updated_at' => Carbon::now()->toDateTimeLocalString(),
             'order_number' => 'TEST000' . mb_strtoupper(Str::random()),
             'buyer_name' => $this->faker->name(),
             'total' => 0,
