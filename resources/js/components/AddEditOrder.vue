@@ -20,10 +20,10 @@
                 <span class="visually-hidden">Loading...</span>
             </div>
         </div>
-        <div class="container" v-show="!this.loading">
+        <div class="container" id="order_form" v-show="!this.loading">
             <form class="" role="search">
                 <div class="row">
-                    <div class="col-md-4">
+                    <div class="col-md-4" id="buyer_group">
                         <label>Buyer Name</label>
                         <input type="text" class="form-control" placeholder="Ex: John Doe"
                                v-model="order.buyer_name"
@@ -31,7 +31,7 @@
                         >
                     </div>
 
-                    <div class="col-md-4">
+                    <div class="col-md-4" id="total_group">
                         <label>Total</label>
                         <input type="number" class="form-control" placeholder="Ex: 250" min="0" v-model="order.total">
                     </div>
@@ -116,7 +116,7 @@ export default {
       }
     },
     async mounted () {
-        if (this.$route.params.orderId) {
+        if (this.$route?.params.orderId) {
             let response = await this.getOrder(this.$route.params.orderId)
 
             let order = new Order()

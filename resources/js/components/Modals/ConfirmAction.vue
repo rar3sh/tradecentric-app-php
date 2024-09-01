@@ -1,5 +1,5 @@
 <template>
-    <div class="modal fade" :id="id" tabindex="-1" aria-hidden="true">
+    <div class="modal fade" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -24,7 +24,6 @@
 export default {
     name: 'ConfirmAction',
     props: {
-        id: {type: String, required: true},
         title: {type: String, required: true},
         content: {required: false, default: ''},
     },

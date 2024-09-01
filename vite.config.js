@@ -15,4 +15,9 @@ export default defineConfig({
             vue: "vue/dist/vue.esm-bundler.js",
         },
     },
+    test: {
+        environment: 'happy-dom',
+        globals: true,
+        setupFiles: 'resources/js/tests/setupTest.ts'
+    }
 });
