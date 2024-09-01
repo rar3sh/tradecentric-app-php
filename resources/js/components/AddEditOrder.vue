@@ -1,11 +1,18 @@
 <template>
-    <h3 v-show="order?.id"> EDIT ORDER # {{ order.order_number }}</h3>
+    <h3 v-show="order?.id"> EDIT ORDER #{{ order.order_number }} from {{$formatDate(order.created_at)}}</h3>
     <h3 v-show="!order?.id"> Add Order</h3>
 
     <ConfirmAction id="delete_confirm_modal"
                    title="Confirmation"
                    content="Are you sure you want to delete the order? It cannot be undone."
                    @confirm="deleteOrder"/>
+
+    <div class="alert alert-warning align-items-center" role="alert"
+         v-show="errorMessage.length > 0"
+         v-on:click="errorMessage = ''"
+    >
+            {{ errorMessage }}
+    </div>
 
     <div class="container">
         <div class="text-center" v-show="this.loading">
@@ -18,7 +25,10 @@
                 <div class="row">
                     <div class="col-md-4">
                         <label>Buyer Name</label>
-                        <input type="text" class="form-control" placeholder="Ex: John Doe" v-model="order.buyer_name">
+                        <input type="text" class="form-control" placeholder="Ex: John Doe"
+                               v-model="order.buyer_name"
+                               minlength="5"
+                        >
                     </div>
 
                     <div class="col-md-4">
@@ -47,17 +57,19 @@ import { Order } from '../Models/Order.ts'
 import ConfirmAction from './Modals/ConfirmAction.vue'
 
 export default {
-    name: 'OrderAddEdit',
+    name: 'AddEditOrder',
     components: { ConfirmAction },
     data () {
         return {
             loading: false,
             order: new Order(),
+            errorMessage: '',
         }
     },
     methods: {
         async getOrder (orderId) {
             this.loading = true
+
             try {
                 return axios.get('/api/orders/' + orderId)
             } catch (error) {
@@ -79,6 +91,7 @@ export default {
         },
         async submit () {
             this.loading = true
+
             try {
                 if (this.order?.id) {
                     await axios.patch('/api/orders/' + this.order.id, this.order)
@@ -87,6 +100,7 @@ export default {
                 }
                 this.redirectToList()
             } catch (error) {
+                this.errorMessage = error.response.data.message
                 console.log(error)
             } finally {
                 this.loading = false
@@ -116,7 +130,3 @@ export default {
     }
 }
 </script>
-
-<style scoped>
-
-</style>

@@ -1,15 +1,14 @@
-import OrderAddEdit from './components/OrderAddEdit.vue'
-import Main from './components/Main.vue'
+import AddEditOrder from './components/AddEditOrder.vue'
 import Charts from './components/Charts.vue'
 import ListOrders from './components/ListOrders.vue'
 import {createRouter, createWebHashHistory} from 'vue-router';
 
 const routes = [
-    { path: '/', name: 'Home', component: Main},
+    { path: '/', name: 'Home', component: ListOrders},
     { path: '/charts', name: 'Charts', component: Charts},
     { path: '/orders', name: 'List Orders', component: ListOrders},
-    { path: '/orders/:orderId', name: 'EditOrder', component: OrderAddEdit},
-    { path: '/orders/add', name: 'AddOrder', component: OrderAddEdit}
+    { path: '/orders/add', name: 'AddOrder', component: AddEditOrder},
+    { path: '/orders/:orderId', name: 'EditOrder', component: AddEditOrder}
 ]
 
 const router = createRouter({

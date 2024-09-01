@@ -49,10 +49,8 @@
             </div>
         </div>
 
-
-
         <!-- TABLE CONTAINER  -->
-        <div class="container" id="orders-table">
+        <div class="container" id="orders-table-container">
             <div class="container bulk-actions-container">
                 <div class="col-md-12" v-show="this.selectedOrders.length > 0">
                     <button class="btn btn-primary m-2" @click.prevent="resetSelection">Reset Selection</button>
@@ -63,7 +61,11 @@
                 </div>
             </div>
 
-            <table class="table">
+            <div class="text-center" style="margin-top: 35px;" v-show="this.loading">
+                <div class="spinner-border" role="status"/>
+            </div>
+
+            <table class="table" id="orders-table" v-show="this.hasDataToDisplay">
                 <thead class="table-light">
                 <tr>
                     <th></th>
@@ -77,13 +79,7 @@
                 </tr>
                 </thead>
 
-                <div class="text-center" v-show="this.loading">
-                    <div class="spinner-border" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
-                </div>
-
-                <tbody v-show="!this.loading && this.hasOrders">
+                <tbody>
                 <tr v-for="(order, index) in this.orders" :key="order.id" class="order-row">
                     <td>
                         <input type="checkbox"
@@ -99,21 +95,21 @@
                     <td>{{ order.total }}</td>
                     <td>{{ $formatDate(order.created_at) }}</td>
                     <td>{{ $formatDate(order.updated_at) }}</td>
-                    <td><RouterLink :to="'/orders/' + order.id">EDIT</RouterLink></td>
+                    <td><RouterLink :to="'/orders/' + order.id" class="btn btn-primary">EDIT</RouterLink></td>
                 </tr>
                 </tbody>
-                <div class="row" v-show="!this.loading && !this.hasOrders">
-                    <h1 class="text-center">No data to display.</h1>
-                </div>
             </table>
 
-            <Pagination :pagination="this.pagination"
+            <div class="row" v-show="!this.loading && this.orders.length === 0">
+                <h1 class="text-center">No data to display.</h1>
+            </div>
+
+            <Pagination :pagination="this.pagination" v-show="this.hasDataToDisplay"
                         @paginationChanged="refreshOrdersList"
             />
         </div>
     </div>
 </template>
-
 
 <script>
 import axios from 'axios'
@@ -123,19 +119,17 @@ import { PaginationModel } from '../Models/PaginationModel.ts'
 
 export default {
     name: 'ListOrders',
-    components: {Pagination, ConfirmAction },
+    components: { Pagination, ConfirmAction },
     data () {
         return {
             loading: false,
             orders: [],
             pagination: new PaginationModel(),
-            lastPage: 0,
             filters: {
                 'order_number': '',
                 'buyer_name': '',
                 'total_minimum': ''
             },
-            ordersCount: 0,
             selectedOrders: [],
             currentOrderId: null
         }
@@ -166,6 +160,7 @@ export default {
 
         async bulkDeleteOrders () {
             this.toggleLoading()
+
             try {
                 await axios.post('/api/orders/delete-bulk', {
                     'ids': this.selectedOrders
@@ -180,7 +175,6 @@ export default {
 
         parseOrderSearchResponse (apiResponse) {
             this.orders = apiResponse.data
-            this.ordersCount = apiResponse.total
 
             let pagination = new PaginationModel()
             pagination.currentPage = apiResponse.current_page
@@ -221,8 +215,8 @@ export default {
             return query
         },
 
-        hasOrders () {
-            return this.orders.length > 0
+        hasDataToDisplay () {
+            return !this.loading && this.orders.length > 0
         }
     },
     mounted () {
@@ -237,6 +231,9 @@ export default {
     margin-left: 30px;
 }
 
+form {
+    margin: 0;
+}
 .form-control {
     margin-top: 3px;
 }
@@ -247,8 +244,8 @@ export default {
 }
 
 .bulk-actions-container {
-    margin: 20px 0px;
-    height: 50px;
+    margin: 10px 0px;
+    height: 40px;
 }
 
 .search-btn {
@@ -256,7 +253,8 @@ export default {
 }
 
 #orders-table {
-    margin-top: 20px;
+    margin-bottom: 10px;
+    margin-top: 10px;
 }
 
 #orders-table .order-row {

@@ -32,17 +32,19 @@ class OrdersController extends Controller
     {
         $order = $this->orderRepository->find($id);
 
-        return $order ? response()->json($order->toArray()) : response()->json(status: 404);
+        if (!$order) {
+            return response()->json(['error' => "Order $id not found."], 404);
+        }
+
+        return response()->json($order->toArray());
     }
 
-    public function update(AddEditOrderRequest $request, string $id)
+    public function update(AddEditOrderRequest $request, string $id): JsonResponse
     {
         $order = $this->orderRepository->find($id);
 
         if (!$order) {
-            return response()->json([
-                'error' => "Order $id not found."
-            ], 404);
+            return response()->json(['error' => "Order $id not found."], 404);
         }
 
         $order->buyer_name = $request->input('buyer_name');
@@ -71,17 +73,14 @@ class OrdersController extends Controller
     public function ordersPerDay(): JsonResponse
     {
         $data = Order::query()
-            ->selectRaw('count(*) as count, date(created_at) as date')
+            ->selectRaw('count(*) as orders_count, date(created_at) as day')
             ->withoutTrashed()
-            ->groupByRaw('date')
+            ->groupByRaw('day')
             ->get();
 
         return response()->json([
-                'count' => $data->pluck('count'),
-                'days' => $data->pluck('date')
-//            'days' => $data->pluck('count', 'date')
-            ]
-
-        );
+            'count' => $data->pluck('orders_count'),
+            'days' => $data->pluck('day')
+        ]);
     }
 }

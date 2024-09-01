@@ -5,12 +5,11 @@ export default {
 </script>
 
 <template>
-    <h3 class="text-center">Order Application made by Rares for the colleagues from Tradecentric (hopefully 😊)</h3>
-    <hr>
+    <h4 class="text-center">Order Application made by Rares for the future colleagues from Tradecentric (hopefully 😊)</h4>
+
     <nav class="nav justify-content-center route-menu">
         <RouterLink class="route-item" to="/orders">List Orders</RouterLink>
         <RouterLink class="route-item" to="/charts">Charts</RouterLink>
-        <hr>
     </nav>
 
     <main>
@@ -20,8 +19,9 @@ export default {
 
 <style scoped>
 .route-menu {
-    margin: 15px;
-    border-bottom: 1px solid black;
+    margin: 5px;
+    border: 1px solid black;
+    background-color: cornsilk;
 }
 .route-item {
     font-size: x-large;
